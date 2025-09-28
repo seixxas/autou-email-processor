@@ -1,0 +1,331 @@
+/* ------------------------------------- */
+/* 1. Configurações Globais e Paleta */
+/* ------------------------------------- */
+:root {
+    /* Cores do Dark Mode */
+    --background-color: #121212; /* Fundo principal bem escuro */
+    --container-bg-color: #1e1e1e; /* Fundo dos cards e contêiner principal */
+    --text-color: #e0e0e0; /* Texto claro */
+    --secondary-text-color: #b0b0b0; /* Texto secundário (parágrafos, labels) */
+    --border-color: #333333; /* Borda sutil */
+
+    /* Cores da Marca (Laranja) */
+    --primary-color: #ff8c00; /* Laranja VIBRANTE para destaque (Botões principais) */
+    --primary-hover: #e67e00;
+
+    /* Cores de Feedback */
+    --success-color: #4CAF50; /* Verde (Produtivo) */
+    --info-color: #6c757d; /* Cinza (Improdutivo) */
+    --error-color: #f44336; /* Vermelho (Erro) */
+    --copy-button-color: #00bcd4; /* Azul Turquesa para Copiar (destaque) */
+
+    --border-radius: 8px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.container {
+    background-color: var(--container-bg-color);
+    width: 100%;
+    max-width: 900px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    border: 1px solid var(--border-color);
+}
+
+/* ------------------------------------- */
+/* 2. Header e Logo */
+/* ------------------------------------- */
+header {
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+    /* Adicionando um filtro para que o logo (se for escuro) fique visível no fundo escuro */
+    filter: brightness(1.2); 
+}
+
+header h1 {
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+header p {
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+}
+
+/* ------------------------------------- */
+/* 3. Área de Entrada (Input) */
+/* ------------------------------------- */
+.input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#email-input {
+    width: 100%;
+    min-height: 250px; /* Aumento da altura conforme solicitado */
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    resize: vertical;
+    font-size: 1em;
+    transition: border-color 0.3s, background-color 0.3s;
+    background-color: #2b2b2b; /* Fundo da caixa de texto */
+    color: var(--text-color); /* Texto digitado em cor clara */
+}
+
+#email-input::placeholder {
+    color: #888;
+}
+
+#email-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 140, 0, 0.5); /* Sombra suave laranja no foco */
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+}
+
+#process-button {
+    background-color: var(--primary-color); /* Laranja */
+    color: var(--container-bg-color); /* Branco ou fundo do container para contraste */
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.2s;
+    flex-grow: 1;
+}
+
+#process-button:hover {
+    background-color: var(--primary-hover);
+    box-shadow: 0 0 10px rgba(255, 140, 0, 0.7);
+}
+
+#process-button:active {
+    transform: scale(0.99);
+}
+
+.secondary-button {
+    background-color: var(--border-color); /* Cinza escuro discreto */
+    color: var(--text-color);
+    padding: 12px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1.1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 30%;
+}
+
+.secondary-button:hover {
+    background-color: #444;
+}
+
+/* ------------------------------------- */
+/* 4. Upload de Arquivos (Melhoria) */
+/* ------------------------------------- */
+.file-upload-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px dashed var(--border-color); /* Borda em destaque */
+    border-radius: var(--border-radius);
+    background-color: #252525;
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+}
+
+.file-name-display {
+    font-style: italic;
+    color: var(--secondary-text-color);
+    flex-grow: 1; /* Ocupa o espaço restante */
+}
+
+/* Esconder o input file padrão */
+#file-upload {
+    display: none;
+}
+
+/* Estilo para simular um botão no label (Mais visível) */
+.file-upload-section label {
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: var(--container-bg-color); /* Texto do botão em cor de alto contraste */
+    padding: 8px 15px;
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s, box-shadow 0.2s;
+    font-weight: 700;
+    white-space: nowrap; /* Garante que o texto não quebre */
+    border: 2px solid var(--primary-color);
+}
+
+.file-upload-section label:hover {
+    background-color: var(--primary-hover);
+    box-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
+}
+
+/* ------------------------------------- */
+/* 5. Área de Resultados (Output) */
+/* ------------------------------------- */
+.output-section h2 {
+    margin-bottom: 15px;
+    font-weight: 500;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.result-box {
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    background-color: #252525;
+}
+
+.category-display {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.label {
+    font-weight: 700;
+    color: var(--secondary-text-color); /* Cor de texto mais clara para o label */
+    margin-right: 10px;
+}
+
+/* Estilos dinâmicos para a tag de categoria */
+.category-tag {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 50px;
+    font-weight: 700;
+    color: var(--container-bg-color); /* Texto da tag em cor escura */
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+/* Cores específicas para as categorias */
+.tag-produtivo {
+    background-color: var(--success-color);
+}
+.tag-improdutivo {
+    background-color: var(--info-color);
+}
+.tag-erro {
+    background-color: var(--error-color);
+}
+
+.response-text {
+    background-color: #333333; /* Fundo mais escuro para a resposta */
+    color: #f0f0f0; /* Texto da resposta bem claro */
+    padding: 15px;
+    border: 1px solid #444;
+    border-radius: var(--border-radius);
+    margin-top: 10px;
+    white-space: pre-wrap;
+    font-style: italic;
+}
+
+/* Botão Copiar Resposta */
+#copy-button {
+    background-color: var(--copy-button-color); /* Azul turquesa */
+    color: var(--container-bg-color); 
+    padding: 8px 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+#copy-button:hover {
+    background-color: #008c9e;
+}
+
+/* ------------------------------------- */
+/* 6. Utilidades e Efeitos */
+/* ------------------------------------- */
+.hidden {
+    display: none !important;
+}
+
+.spinner-container {
+    text-align: center;
+    padding: 30px;
+    color: var(--secondary-text-color);
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error-box {
+    background-color: #5c2020; /* Fundo de erro escuro */
+    color: #f8d7da; /* Texto de erro claro */
+    border: 1px solid #721c24;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+/* ------------------------------------- */
+/* 7. Footer */
+/* ------------------------------------- */
+footer {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+}

@@ -1,0 +1,10 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.log
+
+# Windows
+Thumbs.db
+# Arquivos de Sistema
+.DS_Store

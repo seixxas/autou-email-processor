@@ -1,0 +1,50 @@
+### Teste 1: Cenário Produtivo (Requer Ação)
+POST http://127.0.0.1:5000/process
+Content-Type: application/json
+
+{
+    "email_content": "Minha senha expirou e estou bloqueado fora do sistema. Preciso de uma redefinição urgente!"
+}
+
+### Teste 2: Cenário Improdutivo (Agradecimento)
+POST http://127.0.0.1:5000/process
+Content-Type: application/json
+
+{
+    "email_content": "Gostaria de agradecer ao seu time pela ajuda no último projeto. O trabalho foi excelente!"
+}
+
+### Teste 3: Cenário Produtivo (Problema de Login)
+POST http://127.0.0.1:5000/process
+Content-Type: application/json
+
+{
+    "email_content": "Estamos enfrentando um problema de acesso ao painel de controle desde as 14h. Por favor, precisamos de uma solução imediata. Qual é o status da correção?"
+}
+
+
+### Teste 4: Cenário Produtivo (Solicitação de Reembolso)
+POST http://127.0.0.1:5000/process
+Content-Type: application/json
+
+{
+    "email_content": "Prezado Suporte, preciso solicitar o reembolso total da fatura #4567. Solicito que o processamento seja feito antes do final do dia útil."
+}
+
+
+
+### Teste 5: Cenário Improdutivo (Felicitações)
+POST http://127.0.0.1:5000/process
+Content-Type: application/json
+
+{
+    "email_content": "Olá a todos! Quero parabenizar a equipe de vendas pelo excelente resultado alcançado neste trimestre. Um trabalho incrível!"
+}
+
+### Teste 6: Cenário Improdutivo (Aviso Neutro)
+POST http://127.0.0.1:5000/process
+Content-Type: application/json
+
+{
+    "email_content": "Apenas uma nota para informar que o relatório mensal de atividades foi enviado para o arquivo compartilhado. Não é necessária nenhuma ação de sua parte."
+}
