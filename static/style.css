@@ -13,9 +13,9 @@
     --primary-color: #ff8c00; /* Laranja VIBRANTE para destaque (Botões principais) */
     --primary-hover: #e67e00;
 
-    /* Cores de Feedback */
-    --success-color: #4CAF50; /* Verde (Produtivo) */
-    --info-color: #6c757d; /* Cinza (Improdutivo) */
+    /* Cores de Feedback (AJUSTADAS AOS NOMES DO JS) */
+    --prioridade-color: #f44336; /* Vermelho forte para Prioridade */
+    --pode-esperar-color: #4CAF50; /* Verde para Pode Esperar */
     --error-color: #f44336; /* Vermelho (Erro) */
     --copy-button-color: #00bcd4; /* Azul Turquesa para Copiar (destaque) */
 
@@ -54,20 +54,12 @@ body {
 }
 
 /* ------------------------------------- */
-/* 2. Header e Logo */
+/* 2. Header */
 /* ------------------------------------- */
 header {
     text-align: center;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 20px;
-}
-
-.logo {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 10px;
-    /* Adicionando um filtro para que o logo (se for escuro) fique visível no fundo escuro */
-    filter: brightness(1.2); 
 }
 
 header h1 {
@@ -92,15 +84,15 @@ header p {
 
 #email-input {
     width: 100%;
-    min-height: 250px; /* Aumento da altura conforme solicitado */
+    min-height: 250px; 
     padding: 15px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     resize: vertical;
     font-size: 1em;
     transition: border-color 0.3s, background-color 0.3s;
-    background-color: #2b2b2b; /* Fundo da caixa de texto */
-    color: var(--text-color); /* Texto digitado em cor clara */
+    background-color: #2b2b2b; 
+    color: var(--text-color); 
 }
 
 #email-input::placeholder {
@@ -110,7 +102,7 @@ header p {
 #email-input:focus {
     border-color: var(--primary-color);
     outline: none;
-    box-shadow: 0 0 5px rgba(255, 140, 0, 0.5); /* Sombra suave laranja no foco */
+    box-shadow: 0 0 5px rgba(255, 140, 0, 0.5); 
 }
 
 .button-group {
@@ -119,8 +111,8 @@ header p {
 }
 
 #process-button {
-    background-color: var(--primary-color); /* Laranja */
-    color: var(--container-bg-color); /* Branco ou fundo do container para contraste */
+    background-color: var(--primary-color); 
+    color: var(--container-bg-color); 
     padding: 12px 20px;
     border: none;
     border-radius: var(--border-radius);
@@ -131,17 +123,22 @@ header p {
     flex-grow: 1;
 }
 
-#process-button:hover {
+#process-button:hover:not(:disabled) {
     background-color: var(--primary-hover);
     box-shadow: 0 0 10px rgba(255, 140, 0, 0.7);
 }
 
-#process-button:active {
+#process-button:active:not(:disabled) {
     transform: scale(0.99);
 }
 
+#process-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .secondary-button {
-    background-color: var(--border-color); /* Cinza escuro discreto */
+    background-color: var(--border-color); 
     color: var(--text-color);
     padding: 12px 20px;
     border: 1px solid var(--border-color);
@@ -158,14 +155,15 @@ header p {
 }
 
 /* ------------------------------------- */
-/* 4. Upload de Arquivos (Melhoria) */
+/* 4. Upload de Arquivos */
 /* ------------------------------------- */
 .file-upload-section {
     display: flex;
     align-items: center;
+    flex-wrap: wrap; /* Permite quebras em telas menores */
     gap: 15px;
     padding: 15px;
-    border: 1px dashed var(--border-color); /* Borda em destaque */
+    border: 1px dashed var(--border-color); 
     border-radius: var(--border-radius);
     background-color: #252525;
     font-size: 0.9em;
@@ -175,7 +173,10 @@ header p {
 .file-name-display {
     font-style: italic;
     color: var(--secondary-text-color);
-    flex-grow: 1; /* Ocupa o espaço restante */
+    flex-grow: 1; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Esconder o input file padrão */
@@ -183,20 +184,20 @@ header p {
     display: none;
 }
 
-/* Estilo para simular um botão no label (Mais visível) */
-.file-upload-section label {
+/* Estilo para simular um botão no label */
+.file-upload-label {
     cursor: pointer;
     background-color: var(--primary-color);
-    color: var(--container-bg-color); /* Texto do botão em cor de alto contraste */
+    color: var(--container-bg-color); 
     padding: 8px 15px;
     border-radius: var(--border-radius);
     transition: background-color 0.3s, box-shadow 0.2s;
     font-weight: 700;
-    white-space: nowrap; /* Garante que o texto não quebre */
+    white-space: nowrap; 
     border: 2px solid var(--primary-color);
 }
 
-.file-upload-section label:hover {
+.file-upload-label:hover {
     background-color: var(--primary-hover);
     box-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
 }
@@ -204,13 +205,6 @@ header p {
 /* ------------------------------------- */
 /* 5. Área de Resultados (Output) */
 /* ------------------------------------- */
-.output-section h2 {
-    margin-bottom: 15px;
-    font-weight: 500;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-}
-
 .result-box {
     border: 1px solid var(--border-color);
     padding: 20px;
@@ -226,7 +220,7 @@ header p {
 
 .label {
     font-weight: 700;
-    color: var(--secondary-text-color); /* Cor de texto mais clara para o label */
+    color: var(--secondary-text-color); 
     margin-right: 10px;
 }
 
@@ -236,25 +230,25 @@ header p {
     padding: 5px 10px;
     border-radius: 50px;
     font-weight: 700;
-    color: var(--container-bg-color); /* Texto da tag em cor escura */
+    color: var(--container-bg-color); 
     text-transform: uppercase;
     font-size: 0.9em;
 }
 
-/* Cores específicas para as categorias */
-.tag-produtivo {
-    background-color: var(--success-color);
+/* Cores específicas para as categorias (CORRIGIDAS) */
+.tag-prioridade {
+    background-color: var(--prioridade-color); /* Vermelho forte */
 }
-.tag-improdutivo {
-    background-color: var(--info-color);
+.tag-pode-esperar {
+    background-color: var(--pode-esperar-color); /* Verde */
 }
 .tag-erro {
     background-color: var(--error-color);
 }
 
 .response-text {
-    background-color: #333333; /* Fundo mais escuro para a resposta */
-    color: #f0f0f0; /* Texto da resposta bem claro */
+    background-color: #333333; 
+    color: #f0f0f0; 
     padding: 15px;
     border: 1px solid #444;
     border-radius: var(--border-radius);
@@ -265,7 +259,7 @@ header p {
 
 /* Botão Copiar Resposta */
 #copy-button {
-    background-color: var(--copy-button-color); /* Azul turquesa */
+    background-color: var(--copy-button-color); 
     color: var(--container-bg-color); 
     padding: 8px 15px;
     border: none;
@@ -311,8 +305,8 @@ header p {
 }
 
 .error-box {
-    background-color: #5c2020; /* Fundo de erro escuro */
-    color: #f8d7da; /* Texto de erro claro */
+    background-color: #5c2020; 
+    color: #f8d7da; 
     border: 1px solid #721c24;
     padding: 15px;
     border-radius: var(--border-radius);
@@ -328,4 +322,33 @@ footer {
     border-top: 1px solid var(--border-color);
     font-size: 0.8em;
     color: var(--secondary-text-color);
+}
+
+/* ------------------------------------- */
+/* 8. Responsividade (Opcional, mas recomendado) */
+/* ------------------------------------- */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .button-group {
+        flex-direction: column-reverse; /* Coloca Analisar no topo */
+    }
+
+    .secondary-button {
+        width: 100%;
+    }
+
+    .file-upload-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .file-upload-label,
+    .file-name-display {
+        width: 100%;
+        text-align: center;
+    }
 }

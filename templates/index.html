@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoU - Processador de E-mail Inteligente</title>
+    <title>Analisador de Prioridade de E-mail com IA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
@@ -12,8 +12,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Classificador de E-mails</h1>
-            <p>Cole o corpo do e-mail para classificá-lo (Produtivo/Improdutivo) e gerar uma resposta automática.</p>
+            <h1>Analisador de Prioridade de E-mail</h1>
+            <p>Cole o corpo de um e-mail ou faça o upload de um TXT/PDF para que a IA o classifique e sugira uma resposta.</p>
         </header>
 
         <main>
@@ -21,28 +21,26 @@
                 <textarea id="email-input" placeholder="Cole o corpo do e-mail aqui..."></textarea>
 
                 <div class="file-upload-section">
-                    <label for="file-upload">Fazer Upload de Arquivo (.txt ou .pdf)</label>
+                    <label for="file-upload" class="file-upload-label">Ou faça o upload de um ficheiro (.txt ou .pdf)</label>
                     <input type="file" id="file-upload" accept=".txt, .pdf">
-                    <span id="file-name-display" class="file-name-display">Nenhum arquivo selecionado.</span>
+                    <span id="file-name-display" class="file-name-display">Nenhum ficheiro selecionado.</span>
                 </div>
 
                 <div class="button-group">
-                    <button id="clear-button" class="secondary-button">Limpar Tudo</button>
-                    <button id="process-button">Analisar E-mail</button>
+                    <button id="clear-button" class="secondary-button">Limpar</button>
+                    <button id="process-button">Analisar com Gemini</button>
                 </div>
             </section>
 
             <section class="output-section">
-                <h2>Resultado da Análise</h2>
-
                 <div id="loading-spinner" class="spinner-container hidden">
                     <div class="spinner"></div>
-                    <p>Analisando com Hugging Face...</p>
+                    <p>Analisando com a IA do Gemini...</p>
                 </div>
 
                 <div id="result-box" class="result-box hidden">
                     <div class="category-display">
-                        <span class="label">Categoria:</span>
+                        <span class="label">Prioridade:</span>
                         <span id="category-output" class="category-tag"></span>
                     </div>
 
@@ -50,18 +48,16 @@
                         <span class="label">Resposta Sugerida:</span>
                         <div id="response-output" class="response-text"></div>
                     </div>
-
                     <button id="copy-button" class="hidden">Copiar Resposta</button>
                 </div>
 
                 <div id="error-message" class="error-box hidden">
-                    Ocorreu um erro. Tente novamente mais tarde.
-                </div>
+                    </div>
             </section>
         </main>
 
         <footer>
-            <p>&copy; 2025 AutoU Classificador IA</p>
+            <p>&copy; 2025 Projeto para Entrevista</p>
         </footer>
     </div>
 

@@ -1,215 +1,179 @@
-# app.py
+# app.py - CÓDIGO FINAL COM SUPORTE TXT E PDF
 
-# ----------------------------
-# 1. Configuração e Dependências
-# ----------------------------
+import os
 import json
+import requests
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from transformers import pipeline
-import PyPDF2 
-from io import BytesIO 
+from PyPDF2 import PdfReader # Mudado para PyPDF2 para evitar conflito de importação
+from io import BytesIO
+from dotenv import load_dotenv
 
-# Inicializa o Flask
+# Carrega as variáveis de ambiente do ficheiro .env
+load_dotenv()
+
+# --- 1. Configuração do Flask ---
 app = Flask(__name__)
-# Habilita o CORS para permitir a comunicação com o Front-end
-CORS(app) 
+# CORRIGIDO: Configuração explícita do CORS para aceitar todas as origens
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Variável global para o modelo de classificação do Hugging Face
-classifier = None
+# --- 2. Configuração da API do Gemini ---
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-# ----------------------------
-# 2. Carregamento do Modelo de IA
-# ----------------------------
-try:
-    print("Iniciando carregamento do modelo Hugging Face...")
-    
-    # Modelo pré-treinado para análise de sentimentos (RoBERTa).
-    # Vamos adaptar a saída de 'Positivo'/'Negativo' para 'Improdutivo'/'Produtivo'.
-    model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-    classifier = pipeline("sentiment-analysis", model=model_name)
-    
-    print("Modelo de IA carregado com sucesso.")
-except Exception as e:
-    print(f"ERRO ao carregar o modelo Hugging Face: {e}")
-    classifier = None
-
-# ----------------------------
-# 3. Lógica de Suporte e Geração de Resposta
-# ----------------------------
-
-def generate_response_by_category(category: str) -> str:
+# --- 3. Função de Análise com IA ---
+def analyze_email_with_gemini(email_text: str) -> dict:
     """
-    Gera uma resposta sugerida baseada apenas na categoria do e-mail.
-    Esta lógica simples e gratuita substitui um modelo de geração de texto.
+    Envia o texto do e-mail para a API do Gemini e retorna a resposta estruturada.
     """
-    if category == "Produtivo":
-        # Resposta para solicitações/problemas (tom de ação)
-        return "Recebemos sua solicitação. Nosso time técnico já está analisando o seu caso e retornaremos com uma atualização de status em breve."
-    
-    elif category == "Improdutivo":
-        # Resposta para agradecimentos/sociais (tom educado)
-        return "Agradecemos muito pela sua mensagem e pelo contato. Desejamos um excelente dia e sucesso!"
-    
-    return "Não foi possível gerar uma resposta automática."
+    if not GEMINI_API_KEY:
+        raise ValueError("A chave de API do Gemini não foi encontrada no ficheiro .env")
 
-# app.py - Adicione esta função em algum lugar, por exemplo, após generate_response_by_category
+    # [O restante da sua função analyze_email_with_gemini permanece inalterado]
+    headers = {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY
+    }
+    
+    prompt = f"""
+        Analise o seguinte texto de um e-mail e classifique-o em uma de duas categorias: "Prioridade" ou "Pode Esperar".
+        Depois, gere uma resposta curta e profissional apropriada para a categoria.
 
+        Texto do E-mail:
+        ---
+        {email_text}
+        ---
+
+        Sua resposta DEVE ser um objeto JSON, e APENAS o objeto JSON, com a seguinte estrutura:
+        {{
+          "categoria": "...",
+          "resposta_sugerida": "..."
+        }}
+    """
+
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "response_mime_type": "application/json",
+        }
+    }
+
+    try:
+        response = requests.post(GEMINI_API_URL, headers=headers, json=payload)
+        response.raise_for_status() # Lança um erro para status HTTP 4xx/5xx
+        
+        # A API do Gemini agora retorna o JSON diretamente
+        api_response_text = response.json()['candidates'][0]['content']['parts'][0]['text']
+        # Convertemos a string JSON em um dicionário Python
+        return json.loads(api_response_text)
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Erro na comunicação com a API do Gemini: {e}")
+        raise ConnectionError(f"Não foi possível conectar à API do Gemini. Detalhes: {e}")
+    except (KeyError, IndexError, json.JSONDecodeError) as e:
+        print(f"Erro ao processar a resposta do Gemini: {e}")
+        raise ValueError(f"A resposta da API do Gemini não veio no formato esperado. Detalhes: {e}")
+
+
+# --- 4. Funções de Suporte (Extração de PDF/TXT) ---
 def extract_text_from_pdf(file_stream) -> str:
     """
-    Extrai texto do stream de um arquivo PDF.
-    PyPDF2.PdfReader espera um objeto de arquivo aberto ou um stream (BytesIO).
+    Extrai texto de um stream de bytes de um ficheiro PDF.
     """
     try:
-        pdf_reader = PyPDF2.PdfReader(file_stream)
+        # CORREÇÃO AQUI: Usando apenas PdfReader, que foi importado no topo
+        pdf_reader = PdfReader(file_stream)
         text = ""
         for page in pdf_reader.pages:
-            # O .extract_text() pode retornar None, então tratamos
-            text += page.extract_text() or "" 
+            text += page.extract_text() or ""
         return text.strip()
     except Exception as e:
-        # Se a extração falhar (ex: PDF corrompido ou criptografado), lançamos
         raise ValueError(f"Falha ao extrair texto do PDF: {e}")
-
-
-def process_email_with_ai(email_text: str) -> dict:
+    
+    
+def extract_text_from_txt(file_stream) -> str:
     """
-    Classifica o email usando o modelo Hugging Face e gera a resposta.
+    Extrai texto de um stream de bytes de um ficheiro TXT.
     """
-    if not classifier:
-        return {"category": "Erro", "suggested_response": "Serviço de IA indisponível. Modelo de classificação não carregado."}, 503
-
     try:
-        # 1. Classificação do Sentimento com Hugging Face
-        results = classifier(email_text)
-        label = results[0]['label']
-        
-        # 2. Definição de Palavras-Chave de Ação
-        # Usamos minúsculas para simplificar a comparação
-        email_text_lower = email_text.lower()
-        
-        action_keywords = [
-            "bloqueado", "problema", "falha", "urgente", "defeito", 
-            "preciso", "solicito", "reembolso", "cancelar", "erro"
-        ]
-        
-        # Verifica se alguma palavra-chave está presente
-        has_action_keyword = any(keyword in email_text_lower for keyword in action_keywords)
-        
-        # 3. Lógica Otimizada de Mapeamento (Regras de Desempate)
-        
-        if label == "LABEL_2": # Regra 1: Sentimento Positivo (Elogio, Agradecimento)
-            category = "Improdutivo" 
-            
-        elif has_action_keyword: # Regra 2: Sentimento Neutro/Negativo E tem palavra-chave de Ação
-            category = "Produtivo"
-            
-        else: # Regra 3: Sentimento Neutro/Negativo MAS SEM palavras-chave de Ação
-              # Isso captura e-mails neutros que a IA não entende como Improdutivos
-            category = "Improdutivo"
-
-        # 4. Geração da Resposta
-        suggested_response = generate_response_by_category(category)
-
-        # Retorna o resultado no formato JSON esperado
-        return {
-            "category": category,
-            "suggested_response": suggested_response
-        }
-
+        # Lemos o conteúdo do stream de bytes e o decodificamos
+        return file_stream.read().decode('utf-8').strip()
+    except UnicodeDecodeError:
+        raise ValueError("Erro de codificação ao ler o arquivo TXT. Certifique-se de que é UTF-8.")
     except Exception as e:
-        print(f"Erro no processamento da IA: {e}")
-        return {"category": "Erro", "suggested_response": "Erro ao processar o email."}, 500
+        raise ValueError(f"Falha ao extrair texto do TXT: {e}")
 
 
-# ----------------------------
-# 4. Rota Principal da API (POST)
-# ----------------------------
+# --- 5. Rotas da API ---
 
 @app.route('/process', methods=['POST'])
-def process_email():
-    """
-    Recebe o JSON do front-end com o 'email_content', processa e retorna o resultado.
-    """
+def process_text_route():
+    """ Rota para processar texto enviado como JSON (e-mail copiado e colado). """
+    # [Mantido inalterado]
     try:
         data = request.get_json()
         email_text = data.get('email_content')
-    except Exception:
-        # Retorna 400 se o JSON estiver mal formatado
-        return jsonify({"error": "Requisição inválida. Esperado um JSON com 'email_content'."}), 400
-
-    if not email_text:
-        return jsonify({"error": "Nenhum conteúdo de email fornecido."}), 400
-
-    result = process_email_with_ai(email_text)
-
-    # Lida com erros internos (como o 503)
-    if isinstance(result, tuple):
-        return jsonify(result[0]), result[1]
-
-    # Sucesso (200 OK)
-    return jsonify(result)
-
-
-# ----------------------------
-# 5. Rota Simples de Teste (GET)
-# ----------------------------
-
-@app.route('/', methods=['GET'])
-def home():
-    """
-    Serve o arquivo HTML principal usando o render_template.
-    """
-    return render_template('index.html') 
-
-
+        if not email_text:
+            return jsonify({"error": "Nenhum conteúdo de email fornecido."}), 400
+        
+        result = analyze_email_with_gemini(email_text)
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Erro interno: {str(e)}"}), 500
 
 @app.route('/process_file', methods=['POST'])
 def process_file_route():
-    """
-    Recebe um arquivo (PDF ou TXT), extrai o texto e o processa.
-    """
+    """ Rota para processar um ficheiro PDF ou TXT enviado. """
     if 'email_file' not in request.files:
-        return jsonify({"error": "Nenhum arquivo enviado."}), 400
+        return jsonify({"error": "Nenhum ficheiro enviado."}), 400
 
     file = request.files['email_file']
+    if file.filename == '':
+        return jsonify({"error": "Nenhum ficheiro selecionado."}), 400
+
+    filename = file.filename.lower()
     
     try:
-        file_extension = file.filename.lower().rsplit('.', 1)[-1]
-        
-        # Leitura e extração do conteúdo
-        if file_extension == 'pdf':
-            # PyPDF2 funciona melhor lendo o objeto de arquivo que o Flask fornece diretamente
-            # Ou o seu conteúdo binário bruto:
-            file_stream = BytesIO(file.read())
+        # Lemos o conteúdo do arquivo na memória uma única vez
+        file_bytes = file.read()
+        email_content = None
+
+        if filename.endswith('.pdf'):
+            # Criamos um stream de BytesIO para o PDFReader
+            file_stream = BytesIO(file_bytes)
             email_content = extract_text_from_pdf(file_stream)
-        
-        elif file_extension == 'txt':
-            # Decodificamos o conteúdo binário como texto
-            email_content = file.read().decode('utf-8')
+
+        elif filename.endswith('.txt'):
+            # Criamos um stream de BytesIO para o extrator TXT
+            file_stream = BytesIO(file_bytes)
+            email_content = extract_text_from_txt(file_stream)
         
         else:
-            return jsonify({"error": "Formato de arquivo não suportado. Use .txt ou .pdf"}), 400
+            return jsonify({"error": "Formato de arquivo não suportado. Use .txt ou .pdf."}), 400
 
-        # Chama a função de processamento de IA (a lógica de negócio)
-        if not email_content.strip():
-            return jsonify({"error": "O arquivo estava vazio ou o texto não pôde ser extraído."}), 400
+        if not email_content:
+            return jsonify({"error": "O ficheiro estava vazio ou o texto não pôde ser extraído."}), 400
 
-        result = process_email_with_ai(email_content)
-        
+        # Enviamos o texto extraído para a IA
+        result = analyze_email_with_gemini(email_content)
         return jsonify(result), 200
 
-    except ValueError as ve:
-        # Erro específico de extração de PDF
-        return jsonify({"error": str(ve)}), 400
-        
+    except ValueError as e:
+        # Captura erros específicos de extração (como erro de codificação TXT ou PDF inválido)
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        app.logger.error(f"Erro geral ao processar arquivo: {e}")
-        return jsonify({"error": f"Erro interno no servidor ao ler o arquivo: {str(e)}"}), 500
-# ----------------------------
-# 6. Execução do Servidor
-# ----------------------------
+        # Captura outros erros, incluindo problemas com a API do Gemini
+        return jsonify({"error": f"Erro interno ao processar ficheiro: {str(e)}"}), 500
 
+
+@app.route('/', methods=['GET'])
+def home():
+    """ Rota para servir a página principal. """
+    return render_template('index.html')
+
+# --- 6. Execução do Servidor ---
 if __name__ == '__main__':
-    # Quando for para o deploy, lembre-se de desativar 'debug=True'
-    app.run(debug=True)
+    # Usando porta 5000 como padrão, mas permitindo variável de ambiente (bom para deploy)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
